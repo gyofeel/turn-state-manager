@@ -1,0 +1,16 @@
+{
+  "name": "turn-state-manager",
+  "version": "1.0.0",
+  "description": "A manager for managing a game turn(or order)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "author": "Gyopil Seo(gyofeel)<gyofeel318@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tslint": "^6.1.3"
+  }
+}
