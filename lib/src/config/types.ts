@@ -4,14 +4,16 @@ type Game = TurnGame | null;
 type GameId = string | number | Symbol;
 type GameMaps = Map<GameId, Game>;
 type Options = {
-    turnNumber?: number,
     turnTime: number,
+    turnIndex?: number,
+    turnNumber?: number,
     totalTime?: number,
     autoTurnover?: boolean,
     loop?: boolean
 };
 type Event = {
     START: 'start',
+    PREV_TURN: 'prev-turn',
     NEXT_TURN: 'next-turn',
     COMPLETE: 'complete',
     END: 'end'
