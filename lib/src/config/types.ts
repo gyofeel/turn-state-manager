@@ -8,7 +8,7 @@ type Options = {
     turnIndex?: number,
     turnNumber?: number,
     totalTime?: number,
-    autoTurnover?: boolean,
+    auto?: boolean,
     loop?: boolean
 };
 type Event = {
