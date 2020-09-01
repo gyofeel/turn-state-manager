@@ -3,29 +3,29 @@ import { TurnGame } from './TurnGame';
 
 export class TurnStateManager {
     // the single ton object.
-    private static turnStateManager:TurnStateManager;
+    private static instance: TurnStateManager;
 
     private constructor() {}
 
     private gameMaps:GameMaps = new Map();
     
-    public getInstance(): TurnStateManager {
-        if (!TurnStateManager.turnStateManager) {
-            TurnStateManager.turnStateManager = new TurnStateManager();
+    public static getInstance(): TurnStateManager {
+        if (!TurnStateManager.instance) {
+            TurnStateManager.instance = new TurnStateManager();
         }
-        return TurnStateManager.turnStateManager;
+        return TurnStateManager.instance;
     }
 
-    public setGame(id:GameId, options:Options): boolean {
+    public setGame(id:GameId, options:Options): Game {
         const game = new TurnGame(options);
         this.gameMaps.set(id, game);
-        return true;
+        return game;
     }
 
     public getGameFromId(id:GameId): Game {
         const res = this.gameMaps.get(id);
         if (!res) {
-            return null;
+            return this.setGame(id, {});
         }
         return res;
     }

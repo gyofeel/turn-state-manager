@@ -26,7 +26,7 @@ export class TurnGame {
         this.isInit = true;
         this.setOptions(options);
         this.timer = new Timer({
-            callbackFunction: this.emit,
+            callbackFunction: this.emit.bind(this),
             delay: this.options.turnTime,
             args: [this.autoDirection]
         });
@@ -57,12 +57,13 @@ export class TurnGame {
 
     // Set Event
     public on(eventName: EventName, callback: CallbackFunction) {
+        console.log('called on(): eventName - ', eventName);
         this.callbackFunctions[eventName] = callback;
     }
 
     public emit(eventName: EventName) {
-        const { loop, turnNumber } = this.options;
-
+        const { loop, turnNumber, turnIndex } = this.options;
+        console.log('called emit(): eventName - ', eventName);
         if (eventName === EVENT.NEXT_TURN) {
             let nextIdx = this.turnIndex + 1;
             if (turnNumber! > 0 && loop) {
@@ -86,7 +87,7 @@ export class TurnGame {
             }
         }
         
-        if (turnNumber! > 0) {
+        if (turnNumber! > 0 && turnIndex! + 1 >= turnNumber!) {
             if (loop) {
                 this.emit(EVENT.COMPLETE)
             }
@@ -101,6 +102,7 @@ export class TurnGame {
             };
             (this.callbackFunctions[eventName]!)(arg);
         }
+        console.log('turnIndex - ', this.getTurnIndex());
     }
 
     // Turn Index

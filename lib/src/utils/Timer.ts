@@ -21,11 +21,12 @@ export class Timer {
             ...this.options,
             ...options
         };
+        console.log('called setOptions(): this.options - ', this.options);
     }
     public init() {
-        const { callbackFunction, delay } = this.options;
+        const { callbackFunction, delay, args } = this.options;
         this.remove();
-        this.id = setInterval(callbackFunction!, delay);
+        this.id = setInterval(callbackFunction!, delay, ...args!);
     }
     public remove() {
         if (this.id) {

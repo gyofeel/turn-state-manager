@@ -1,10 +1,10 @@
 import { TurnGame } from '../TurnGame';
 
-type Game = TurnGame | null;
+type Game = TurnGame;
 type GameId = string | number | Symbol;
 type GameMaps = Map<GameId, Game>;
 type Options = {
-    turnTime: number,
+    turnTime?: number,
     turnIndex?: number,
     turnNumber?: number,
     totalTime?: number,
