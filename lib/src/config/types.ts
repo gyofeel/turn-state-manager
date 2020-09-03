@@ -4,10 +4,12 @@ type Game = TurnGame;
 type GameId = string | number | Symbol;
 type GameMaps = Map<GameId, Game>;
 type Options = {
-    turnTime?: number,
     turnIndex?: number,
     turnNumber?: number,
+    turnTime?: number,
     totalTime?: number,
+    turnTimeTickCallback?: Function,
+    totalTimeTickCallback?: Function,
     auto?: boolean,
     loop?: boolean
 };
