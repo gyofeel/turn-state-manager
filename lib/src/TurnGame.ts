@@ -28,6 +28,53 @@ export class TurnGame {
     private initialize(options: Options) {
         this.isInit = true;
         this.setOptions(options);
+        this.setTimers();
+    }
+
+    public setOptions(options: Options) {
+        if (options.turnIndex) {
+            options.turnIndex = options.turnIndex < 0 ? 0 : options.turnIndex;
+        }
+        if (options.turnNumber) {
+            options.turnNumber = options.turnNumber <= 0 ? -1 : options.turnNumber;
+        }
+        if (options.turnIndex && options.turnNumber) {
+            options.turnIndex = options.turnIndex + 1 > options.turnNumber ? options.turnNumber - 1 : options.turnNumber;
+        }
+        this.options = {
+            ...this.options,
+            ...options
+        }
+        // set a value of the default options
+        this.turnIndex = this.options.turnIndex || 0;
+    }
+
+    public start() {
+        if (!this.isInit) {
+            throw new RangeError('Initialize a TurnGame instance before starting.');
+        }
+        this.emit(EVENT.START);
+        this.startTimers();
+    }
+
+    // Set Event
+    public on(eventName: EventName, callback: CallbackFunction) {
+        // console.log('called on(): eventName - ', eventName);
+        this.callbackFunctions[eventName] = callback;
+    }
+
+    public emit(eventName: EventName) {
+        // console.log('called emit(): eventName - ', eventName);
+        this.callEventCallback(eventName);
+        this.controllGame(eventName);
+        this.fixAutoDirection(eventName);
+    }
+
+    public getTurnIndex() {
+        return this.turnIndex;
+    }
+    
+    private setTimers() {
         this.gameTimer = new Timer({
             callbackFunction: this.emit.bind(this),
             duration: this.options.totalTime,
@@ -40,32 +87,9 @@ export class TurnGame {
         }, this.options.turnTimeTickCallback?.bind(this));
     }
 
-    public setOptions(options: Options) {
-        if (options.turnNumber && options.turnNumber <= 0) {
-            options.turnNumber = -1;
-        }
-        if (options.turnIndex && options.turnIndex < 0) {
-            options.turnIndex = 0;
-        }
-        if (options.turnIndex && options.turnNumber) {
-            if (options.turnIndex + 1 > options.turnNumber) {
-                options.turnIndex = options.turnNumber - 1;
-            }
-        }
-        this.options = {
-            ...this.options,
-            ...options
-        }
-        // TODO: call funtions to set a value of the default options.
-        this.turnIndex = this.options.turnIndex || 0;
-    }
-
-    public start() {
-        if (!this.isInit) {
-            throw new RangeError('Initialize a TurnGame instance before starting.');
-        }
+    private startTimers() {
         const { auto, turnTime, totalTime } = this.options;
-        this.emit(EVENT.START);
+
         if (auto && turnTime! > 0 && this.turnTimer) {
             this.turnTimer.init();
         }
@@ -74,25 +98,6 @@ export class TurnGame {
         }
     }
 
-    // Set Event
-    public on(eventName: EventName, callback: CallbackFunction) {
-        console.log('called on(): eventName - ', eventName);
-        this.callbackFunctions[eventName] = callback;
-    }
-
-    public emit(eventName: EventName) {
-        console.log('called emit(): eventName - ', eventName);
-
-        this.callEventCallback(eventName);
-        this.controllGame(eventName);
-        this.fixAutoDirection(eventName);
-    }
-
-    // Turn Index
-    public getTurnIndex() {
-        return this.turnIndex;
-    }
-    
     private callEventCallback(eventName: EventName) {
         if (this.callbackFunctions[eventName]) {
             const arg = {

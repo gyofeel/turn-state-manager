@@ -43,7 +43,6 @@ export class Timer {
             ...options
         };
         this.options.duration = this.transformDuration(this.options.duration!);
-        //NOTE: Is needed to call init method()?
         this.remove();
     }
     public init() {
