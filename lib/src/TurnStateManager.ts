@@ -1,5 +1,6 @@
 import { GameMaps, GameId, Game, Options } from './config/types';
 import { TurnGame } from './TurnGame';
+import { EVENT } from './config/constants';
 
 export class TurnStateManager {
     // the single ton object.
@@ -42,12 +43,16 @@ export class TurnStateManager {
 
     public removeGame(id:GameId): boolean {
         if (this.gameMaps.has(id)) {
+            this.getGameFromId(id).emit(EVENT.END);
             return this.gameMaps.delete(id);
         }
         return false;
     }
 
     public clearGames() {
+        this.gameMaps.forEach((value) => {
+            value.emit(EVENT.END)
+        });
         this.gameMaps.clear();
     } 
 }
