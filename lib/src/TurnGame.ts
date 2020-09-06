@@ -57,7 +57,7 @@ export class TurnGame {
             ...options
         }
         // TODO: call funtions to set a value of the default options.
-        this.setTurnIndex(this.options.turnIndex || 0);
+        this.turnIndex = this.options.turnIndex || 0;
     }
 
     public start() {
@@ -81,48 +81,19 @@ export class TurnGame {
     }
 
     public emit(eventName: EventName) {
-        const { loop, turnNumber, auto } = this.options;
         console.log('called emit(): eventName - ', eventName);
-        if (eventName === EVENT.NEXT_TURN) {
-            let nextIdx = this.turnIndex + 1;
-            if (turnNumber! > 0 && nextIdx + 1 > turnNumber!) {
-                nextIdx = loop ? 0 : this.turnIndex;
-            }
-            this.setTurnIndex(nextIdx);
-        } else if (eventName === EVENT.PREV_TURN) {
-            let prevIdx = this.turnIndex - 1;
-            if (prevIdx < 0) {
-                prevIdx = turnNumber! > 0 && loop ? turnNumber! - 1 : 0;
-            }
-            this.setTurnIndex(prevIdx);
-        } else if (eventName === EVENT.COMPLETE) {
-            if (auto && loop) {
-                this.turnTimer?.init();
-            }
-            return;
-        } else if (eventName === EVENT.END) {
-            this.turnTimer?.remove();
-            this.gameTimer?.remove();
-            return;
-        }
-        if (this.turnTimer && auto && (eventName === EVENT.NEXT_TURN || eventName === EVENT.PREV_TURN)) {
-            if (eventName !== this.autoDirection) {
-                this.autoDirection = eventName;
-                this.turnTimer.setOptions({
-                    args: [this.autoDirection]
-                });
-            }
-            this.turnTimer.init();
-        }
-        
-        if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
-            if (loop) {
-                this.emit(EVENT.COMPLETE)
-            } else {
-                this.emit(EVENT.END);
-            }
-        }
 
+        this.callEventCallback(eventName);
+        this.controllGame(eventName);
+        this.fixAutoDirection(eventName);
+    }
+
+    // Turn Index
+    public getTurnIndex() {
+        return this.turnIndex;
+    }
+    
+    private callEventCallback(eventName: EventName) {
         if (this.callbackFunctions[eventName]) {
             const arg = {
                 type: eventName,
@@ -131,16 +102,56 @@ export class TurnGame {
             };
             (this.callbackFunctions[eventName]!)(arg);
         }
-        console.log('turnIndex - ', this.getTurnIndex());
     }
 
-    // Turn Index
-    private setTurnIndex(index: number) {
-        this.turnIndex = index;
+    private controllGame(eventName: EventName) {
+        const { loop, turnNumber, auto } = this.options;
+
+        if (eventName === EVENT.NEXT_TURN) {
+            let nextIdx = this.turnIndex + 1;
+            if (turnNumber! > 0 && nextIdx + 1 > turnNumber!) {
+                nextIdx = loop ? 0 : this.turnIndex;
+            }
+            this.turnIndex = nextIdx;
+        } else if (eventName === EVENT.PREV_TURN) {
+            let prevIdx = this.turnIndex - 1;
+            if (prevIdx < 0) {
+                prevIdx = turnNumber! > 0 && loop ? turnNumber! - 1 : 0;
+            }
+            this.turnIndex = prevIdx;
+        } else if (eventName === EVENT.COMPLETE) {
+            if (auto && loop) {
+                this.turnTimer?.init();
+            }
+            return;
+        } else if (eventName === EVENT.END) {
+            this.gameTimer?.remove();
+            this.turnTimer?.remove();
+            this.gameTimer = null;
+            this.turnTimer = null;
+            return;
+        }
+
+        if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
+            if (loop) {
+                this.emit(EVENT.COMPLETE)
+            } else {
+                this.emit(EVENT.END);
+            }
+        }
     }
 
-    public getTurnIndex() {
-        return this.turnIndex;
+    private fixAutoDirection(eventName: EventName) {
+        const { auto } = this.options;
+
+        if (auto && this.turnTimer && (eventName === EVENT.NEXT_TURN || eventName === EVENT.PREV_TURN)) {
+            if (eventName !== this.autoDirection) {
+                this.autoDirection = eventName;
+                this.turnTimer.setOptions({
+                    args: [this.autoDirection]
+                });
+            }
+            this.turnTimer.init();
+        }
     }
-    // Controll Game
 }
