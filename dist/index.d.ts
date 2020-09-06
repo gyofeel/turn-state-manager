@@ -1,2 +1,3 @@
 import { TurnStateManager } from './src/TurnStateManager';
-export default TurnStateManager;
+import { EVENT } from './src/config/constants';
+export { TurnStateManager, EVENT };
