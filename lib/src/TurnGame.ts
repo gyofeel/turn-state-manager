@@ -8,7 +8,7 @@ export class TurnGame {
     }
 
     private isInit: boolean = false;
-    private autoDirection :EventName = EVENT.NEXT_TURN;
+    private autoDirection: EventName = EVENT.NEXT_TURN;
     private options: Options = {
         turnIndex: 0,
         turnNumber: -1,
@@ -65,6 +65,9 @@ export class TurnGame {
 
     public emit(eventName: EventName) {
         // console.log('called emit(): eventName - ', eventName);
+        if (eventName === EVENT.COMPLETE) {
+            return;
+        }
         this.callEventCallback(eventName);
         this.controllGame(eventName);
         this.fixAutoDirection(eventName);
@@ -139,7 +142,7 @@ export class TurnGame {
 
         if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
             if (loop) {
-                this.emit(EVENT.COMPLETE)
+                this.emitCompleteEvent();
             } else {
                 this.emit(EVENT.END);
             }
@@ -158,5 +161,10 @@ export class TurnGame {
             }
             this.turnTimer.init();
         }
+    }
+
+    private emitCompleteEvent() {
+        this.callEventCallback(EVENT.COMPLETE);
+        this.controllGame(EVENT.COMPLETE);
     }
 }
