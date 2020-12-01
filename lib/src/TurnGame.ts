@@ -140,7 +140,7 @@ export class TurnGame {
             return;
         }
 
-        if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
+        if (turnNumber! > 0 && (this.turnIndex + 1) > turnNumber!) {
             if (loop) {
                 this.emitCompleteEvent();
             } else {
