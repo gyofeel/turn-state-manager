@@ -119,6 +119,11 @@ export class TurnGame {
             let nextIdx = this.turnIndex + 1;
             if (turnNumber! > 0 && nextIdx + 1 > turnNumber!) {
                 nextIdx = loop ? 0 : this.turnIndex;
+                if (loop) {
+                    this.emitCompleteEvent();
+                } else {
+                    this.emit(EVENT.END);
+                }
             }
             this.turnIndex = nextIdx;
             return;
@@ -140,14 +145,6 @@ export class TurnGame {
             this.gameTimer = null;
             this.turnTimer = null;
             return;
-        }
-
-        if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
-            if (loop) {
-                this.emitCompleteEvent();
-            } else {
-                this.emit(EVENT.END);
-            }
         }
     }
 
