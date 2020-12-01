@@ -121,12 +121,14 @@ export class TurnGame {
                 nextIdx = loop ? 0 : this.turnIndex;
             }
             this.turnIndex = nextIdx;
+            return;
         } else if (eventName === EVENT.PREV_TURN) {
             let prevIdx = this.turnIndex - 1;
             if (prevIdx < 0) {
                 prevIdx = turnNumber! > 0 && loop ? turnNumber! - 1 : 0;
             }
             this.turnIndex = prevIdx;
+            return;
         } else if (eventName === EVENT.COMPLETE) {
             if (auto && loop) {
                 this.turnTimer?.init();
@@ -140,7 +142,7 @@ export class TurnGame {
             return;
         }
 
-        if (turnNumber! > 0 && (this.turnIndex + 1) > turnNumber!) {
+        if (turnNumber! > 0 && (this.turnIndex + 1) >= turnNumber!) {
             if (loop) {
                 this.emitCompleteEvent();
             } else {

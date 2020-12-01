@@ -21,7 +21,7 @@ type Event = {
     END: 'end'
 };
 type EventName = Event[keyof Event];
-type CallbackFunction = (arg: any) => {};
+type CallbackFunction = (arg: any) => any;
 type CallbackFunctions = {
     [eventName in EventName]?: CallbackFunction
 };
