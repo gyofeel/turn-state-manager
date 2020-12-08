@@ -6,7 +6,7 @@ export class TurnGame {
     public constructor(options: Options) {
         this.initialize(options);
     }
-
+    private static TIMER_OFFSET_VALUE = 150;
     private isInit: boolean = false;
     private autoDirection: EventName = EVENT.NEXT_TURN;
     private options: Options = {
@@ -21,14 +21,14 @@ export class TurnGame {
     }
     private callbackFunctions: CallbackFunctions = {};
     private turnIndex: number = 0;
+    private prevTurnIndex: number = 0;
     private gameTimer: Timer | null = null;
     private turnTimer: Timer | null = null;
-
+    private turnOverTime: number = Date.now();
     // Initial Game
     private initialize(options: Options) {
         this.isInit = true;
         this.setOptions(options);
-        this.setTimers();
     }
 
     public setOptions(options: Options) {
@@ -53,6 +53,7 @@ export class TurnGame {
         if (!this.isInit) {
             throw new RangeError('Initialize a TurnGame instance before starting.');
         }
+        this.setTimers();
         this.emit(EVENT.START);
         this.startTimers();
     }
@@ -68,8 +69,8 @@ export class TurnGame {
         if (eventName === EVENT.COMPLETE) {
             return;
         }
-        this.callEventCallback(eventName);
         this.controllGame(eventName);
+        this.callEventCallback(eventName);
         this.fixAutoDirection(eventName);
     }
 
@@ -117,21 +118,26 @@ export class TurnGame {
 
         if (eventName === EVENT.NEXT_TURN) {
             let nextIdx = this.turnIndex + 1;
-            if (turnNumber! > 0 && nextIdx + 1 > turnNumber!) {
-                nextIdx = loop ? 0 : this.turnIndex;
+            if (turnNumber! > 0 && nextIdx > turnNumber! - 1) {
                 if (loop) {
                     this.emitCompleteEvent();
+                    nextIdx = 0;
                 } else {
                     this.emit(EVENT.END);
+                    nextIdx = this.turnIndex;
                 }
             }
+            this.prevTurnIndex = this.turnIndex;
+            this.turnOverTime = Date.now();
             this.turnIndex = nextIdx;
             return;
         } else if (eventName === EVENT.PREV_TURN) {
             let prevIdx = this.turnIndex - 1;
-            if (prevIdx < 0) {
-                prevIdx = turnNumber! > 0 && loop ? turnNumber! - 1 : 0;
+            if (turnNumber! > 0 && prevIdx < 0) {
+                prevIdx = loop ? turnNumber! - 1 : 0;
             }
+            this.turnOverTime = Date.now();
+            this.prevTurnIndex = this.turnIndex;
             this.turnIndex = prevIdx;
             return;
         } else if (eventName === EVENT.COMPLETE) {
@@ -144,6 +150,9 @@ export class TurnGame {
             this.turnTimer?.remove();
             this.gameTimer = null;
             this.turnTimer = null;
+            if (Date.now() - this.turnOverTime < TurnGame.TIMER_OFFSET_VALUE) {
+                this.turnIndex = this.prevTurnIndex;
+            }
             return;
         }
     }

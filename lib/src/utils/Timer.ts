@@ -58,6 +58,9 @@ export class Timer {
             clearInterval(this.id);
         }
     }
+    public getRemainedTime() {
+        return this.options.duration! - this.time;
+    }
     private transformDuration(duration:number) {
         return duration / Timer.INTERVAL_DURATION * 100;
     }
