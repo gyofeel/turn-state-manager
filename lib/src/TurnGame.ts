@@ -7,7 +7,7 @@ export class TurnGame {
         this.initialize(options);
     }
     private static TIMER_OFFSET_VALUE = 150;
-    private isInit: boolean = false;
+    // private isInit: boolean = false;
     private autoDirection: EventName = EVENT.NEXT_TURN;
     private options: Options = {
         turnIndex: 0,
@@ -27,11 +27,11 @@ export class TurnGame {
     private turnOverTime: number = Date.now();
     // Initial Game
     private initialize(options: Options) {
-        this.isInit = true;
+        // this.isInit = true;
         this.setOptions(options);
     }
 
-    public setOptions(options: Options) {
+    private setOptions(options: Options) {
         if (options.turnIndex) {
             options.turnIndex = options.turnIndex < 0 ? 0 : options.turnIndex;
         }
@@ -50,18 +50,31 @@ export class TurnGame {
     }
 
     public start() {
-        if (!this.isInit) {
-            throw new RangeError('Initialize a TurnGame instance before starting.');
-        }
-        this.setTimers();
+        // if (!this.isInit) {
+        //     throw new RangeError('Initialize a TurnGame instance before starting.');
+        // }
         this.emit(EVENT.START);
-        this.startTimers();
     }
 
     // Set Event
     public on(eventName: EventName, callback: CallbackFunction) {
         // console.log('called on(): eventName - ', eventName);
-        this.callbackFunctions[eventName] = callback;
+        if (!this.callbackFunctions[eventName]) {
+            this.callbackFunctions[eventName] = new Set();
+        }
+        this.callbackFunctions[eventName]!.add(callback);
+
+    }
+    public off(eventName: EventName, callback?: CallbackFunction) {
+        const functionsSet = this.callbackFunctions[eventName];
+        if (!functionsSet) {
+            return;
+        }
+        if (!callback) {
+            functionsSet.clear();
+            return;
+        }
+        functionsSet.delete(callback);
     }
 
     public emit(eventName: EventName) {
@@ -77,13 +90,30 @@ export class TurnGame {
     public getTurnIndex() {
         return this.turnIndex;
     }
+
+    public setLoopOption(isLoop: boolean) {
+        this.options.loop = isLoop;
+    }
+
+    public setAutoOption(isAuto: boolean) {
+        this.options.auto = isAuto;
+        if (isAuto) {
+            this.setTurnTimer();
+            this.startTurnTimer();
+            return;
+        }
+        this.turnTimer?.remove();
+    }
     
-    private setTimers() {
+    private setGameTimer() {
         this.gameTimer = new Timer({
             callbackFunction: this.emit.bind(this),
             duration: this.options.totalTime,
             args: [EVENT.END],
         }, this.options.totalTimeTickCallback?.bind(this));
+    }
+
+    private setTurnTimer() {
         this.turnTimer = new Timer({
             callbackFunction: this.emit.bind(this),
             duration: this.options.turnTime,
@@ -91,14 +121,19 @@ export class TurnGame {
         }, this.options.turnTimeTickCallback?.bind(this));
     }
 
-    private startTimers() {
-        const { auto, turnTime, totalTime } = this.options;
+    private startGameTimer() {
+        const { totalTime } = this.options;
+
+        if (totalTime !> 0 && this.gameTimer) {
+            this.gameTimer.init();
+        }
+    }
+
+    private startTurnTimer() {
+        const { auto, turnTime } = this.options;
 
         if (auto && turnTime! > 0 && this.turnTimer) {
             this.turnTimer.init();
-        }
-        if (totalTime !> 0 && this.gameTimer) {
-            this.gameTimer.init();
         }
     }
 
@@ -109,14 +144,20 @@ export class TurnGame {
                 index: this.turnIndex,
                 this: this
             };
-            (this.callbackFunctions[eventName]!)(arg);
+            this.callbackFunctions[eventName]!.forEach((callback) => {
+                callback(arg);
+            });
         }
     }
 
     private controllGame(eventName: EventName) {
         const { loop, turnNumber, auto } = this.options;
-
-        if (eventName === EVENT.NEXT_TURN) {
+        if (eventName === EVENT.START) {
+            this.setGameTimer();
+            this.setTurnTimer();
+            this.startGameTimer();
+            this.startTurnTimer();
+        } else if (eventName === EVENT.NEXT_TURN) {
             let nextIdx = this.turnIndex + 1;
             if (turnNumber! > 0 && nextIdx > turnNumber! - 1) {
                 if (loop) {
