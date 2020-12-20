@@ -3,4 +3,4 @@ Not developed completely yet!
 
 This module is a manager for managing a game turn(or order).
 
-[Documents](https://www.notion.so/Turn-State-Manager-14ba61f0c20e47c8b8d24a689ece3fde)
+[Documents](https://www.notion.so/Documents-v0-9-6-ecfa12fc9a9d47bbb75257ed0c584f35)
