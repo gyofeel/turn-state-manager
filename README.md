@@ -1,5 +1,4 @@
 # turn-state-manager
-Not developed completely yet!
 
 This module is a manager for managing a game turn(or order).
 
