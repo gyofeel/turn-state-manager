@@ -59,7 +59,22 @@ export class TurnGame {
     // Set Event
     public on(eventName: EventName, callback: CallbackFunction) {
         // console.log('called on(): eventName - ', eventName);
-        this.callbackFunctions[eventName] = callback;
+        if (!this.callbackFunctions[eventName]) {
+            this.callbackFunctions[eventName] = new Set();
+        }
+        this.callbackFunctions[eventName]!.add(callback);
+
+    }
+    public off(eventName: EventName, callback?: CallbackFunction) {
+        const functionsSet = this.callbackFunctions[eventName];
+        if (!functionsSet) {
+            return;
+        }
+        if (!callback) {
+            functionsSet.clear();
+            return;
+        }
+        functionsSet.delete(callback);
     }
 
     public emit(eventName: EventName) {
@@ -106,14 +121,19 @@ export class TurnGame {
         }, this.options.turnTimeTickCallback?.bind(this));
     }
 
-    private startTimers() {
-        const { auto, turnTime, totalTime } = this.options;
+    private startGameTimer() {
+        const { totalTime } = this.options;
+
+        if (totalTime !> 0 && this.gameTimer) {
+            this.gameTimer.init();
+        }
+    }
+
+    private startTurnTimer() {
+        const { auto, turnTime } = this.options;
 
         if (auto && turnTime! > 0 && this.turnTimer) {
             this.turnTimer.init();
-        }
-        if (totalTime !> 0 && this.gameTimer) {
-            this.gameTimer.init();
         }
     }
 
@@ -124,7 +144,9 @@ export class TurnGame {
                 index: this.turnIndex,
                 this: this
             };
-            (this.callbackFunctions[eventName]!)(arg);
+            this.callbackFunctions[eventName]!.forEach((callback) => {
+                callback(arg);
+            });
         }
     }
 

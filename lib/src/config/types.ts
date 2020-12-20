@@ -22,8 +22,9 @@ type Event = {
 };
 type EventName = Event[keyof Event];
 type CallbackFunction = (arg: any) => any;
+type CallbackFunctionsSet = Set<CallbackFunction>;
 type CallbackFunctions = {
-    [eventName in EventName]?: CallbackFunction
+    [eventName in EventName]?: CallbackFunctionsSet
 };
 
 export type { Game, GameId, GameMaps, Options, Event, EventName, CallbackFunction, CallbackFunctions };
