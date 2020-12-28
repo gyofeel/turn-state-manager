@@ -10,6 +10,14 @@ export class TurnStateManager {
 
     private gameMaps:GameMaps = new Map();
     
+    private EVENT = EVENT;
+
+    public START = this.EVENT.START;
+    public PREV_TURN = this.EVENT.PREV_TURN;
+    public NEXT_TURN = this.EVENT.NEXT_TURN;
+    public COMPLETE = this.EVENT.COMPLETE;
+    public END = this.EVENT.END;
+
     public static getInstance(): TurnStateManager {
         if (!TurnStateManager.instance) {
             TurnStateManager.instance = new TurnStateManager();
