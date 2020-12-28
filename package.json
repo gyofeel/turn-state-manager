@@ -14,7 +14,5 @@
   },
   "author": "Gyopil Seo(gyofeel)<gyofeel318@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
-    "tslint": "^6.1.3"
-  }
+  "devDependencies": {}
 }
