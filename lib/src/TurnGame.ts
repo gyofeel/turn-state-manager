@@ -91,6 +91,10 @@ export class TurnGame {
         return this.turnIndex;
     }
 
+    public getAutoDirection() {
+        return this.autoDirection;
+    }
+
     public setLoopOption(isLoop: boolean) {
         this.options.loop = isLoop;
     }
