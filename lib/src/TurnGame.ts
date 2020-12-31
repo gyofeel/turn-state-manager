@@ -82,7 +82,10 @@ export class TurnGame {
         if (eventName === EVENT.COMPLETE) {
             return;
         }
-        this.controllGame(eventName);
+        const resControl = this.controlGame(eventName);
+        if (resControl) {
+            return;
+        }
         this.callEventCallback(eventName);
         this.fixAutoDirection(eventName);
     }
@@ -154,15 +157,17 @@ export class TurnGame {
         }
     }
 
-    private controllGame(eventName: EventName) {
+    private controlGame(eventName: EventName) {
         const { loop, turnNumber, auto } = this.options;
         if (eventName === EVENT.START) {
             this.setGameTimer();
             this.setTurnTimer();
             this.startGameTimer();
             this.startTurnTimer();
+            return;
         } else if (eventName === EVENT.NEXT_TURN) {
             let nextIdx = this.turnIndex + 1;
+            let boolEnd = false;
             if (turnNumber! > 0 && nextIdx > turnNumber! - 1) {
                 if (loop) {
                     this.emitCompleteEvent();
@@ -170,12 +175,13 @@ export class TurnGame {
                 } else {
                     this.emit(EVENT.END);
                     nextIdx = this.turnIndex;
+                    boolEnd = true;
                 }
             }
             this.prevTurnIndex = this.turnIndex;
             this.turnOverTime = Date.now();
             this.turnIndex = nextIdx;
-            return;
+            return boolEnd;
         } else if (eventName === EVENT.PREV_TURN) {
             let prevIdx = this.turnIndex - 1;
             if (turnNumber! > 0 && prevIdx < 0) {
@@ -218,6 +224,6 @@ export class TurnGame {
 
     private emitCompleteEvent() {
         this.callEventCallback(EVENT.COMPLETE);
-        this.controllGame(EVENT.COMPLETE);
+        this.controlGame(EVENT.COMPLETE);
     }
 }
